@@ -1,0 +1,99 @@
+# Author Doug Leece  dleece @ firstfiretech dot ca
+#
+# Dec 2022   Define specific parsing patterns with names indicating the log entry they are normally intended to parse
+#            and have consistent token syntax for reassembling. Note, parsing is after the intial header split to allow
+#            the same parser to be used whether it is a local log or collected via syslog forwarding. 
+#
+# Where possible, logstash default patterns have been used, 
+# https://github.com/logstash-plugins/logstash-patterns-core/blob/main/patterns/ecs-v1/grok-patterns
+# Extracted field names should align to Elastic Common Schema for portability, 
+# 
+# https://www.elastic.co/guide/en/ecs/current/ecs-field-reference.html
+# 
+# Note: dot notation is reference only, to define objects for use in Elastic use rename
+# https://discuss.elastic.co/t/convert-fields-to-ecs/224888
+# https://github.com/elastic/ecs/issues/39
+#############################################################################################################################
+
+# Cron events Ubuntu Linux Auth logs
+CRONSTART ^%{GREEDYDATA:gd_1}opened%{SPACE}for%{SPACE}user%{SPACE}%{USERNAME:user.name}%{GREEDYDATA:gd_2}$
+CRONSTOP ^%{GREEDYDATA:gd_1}closed%{SPACE}for%{SPACE}user%{SPACE}%{USERNAME:user.name}$
+
+# SSH events Ubuntu Linux Auth logs
+#SSHAUTHIVU ^%{SPACE}Invalid user %{USERNAME:user.name} from %{IP:source.ip} port %{POSINT:source.port}$
+SSHAUTHIVU ^%{SPACE}Invalid user%{SPACE}%{NOTSPACE:user.name}%{SPACE}from%{SPACE}%{IP:source.ip}%{SPACE}port%{SPACE}%{POSINT:source.port}$
+SSHAUTHIVU0 ^%{SPACE}Invalid%{SPACE}user%{SPACE}from%{SPACE}%{IP:source.ip}%{SPACE}port%{SPACE}%{POSINT:source.port}$
+SSHAUTHIVU1 ^%{SPACE}input_userauth_request%{GREEDYDATA:gd_1}user%{SPACE}%{USERNAME:user.name}%{GREEDYDATA:gd_2}$
+SSHAUTHDU ^%{SPACE}Disconnected%{SPACE}from%{SPACE}%{WORD:wd_1}%{SPACE}user%{SPACE}%{USERNAME:user.name}%{SPACE}%{IP:source.ip}%{SPACE}port%{SPACE}%{POSINT:source.port}%{GREEDYDATA:gd_1}$
+SSHAUTHRST ^%{SPACE}Connection%{SPACE}reset%{SPACE}by%{SPACE}authenticating%{SPACE}user%{SPACE}%{USERNAME:user.name}%{SPACE}%{IP:source.ip}%{SPACE}port%{SPACE}%{POSINT:source.port}%{GREEDYDATA:gd_1}$
+SSHAUTHRST2 ^%{SPACE}Connection%{SPACE}reset%{SPACE}by%{SPACE}%{IP:source.ip}%{SPACE}port%{SPACE}%{POSINT:source.port}%{GREEDYDATA:gd_1}$
+SSHAUTHIPO ^%{GREEDYDATA:gd_1}authentication failure%{GREEDYDATA:gd_2}ruser=%{SPACE}rhost=%{IPORHOST:source_host}%{SPACE}$
+SSHAUTHIPU ^%{GREEDYDATA:gd_1}authentication failure%{GREEDYDATA:gd_2}ruser=%{SPACE}rhost=%{IPORHOST:source_host}%{SPACE}user=%{USERNAME:user.name}$
+SSHAUTHHST1 ^%{SPACE}PAM%{GREEDYDATA:gd_1}failures;%{GREEDYDATA:gd_2}ruser=%{SPACE}rhost=%{HOSTNAME:source.host.name}$
+SSHAUTHHST2 ^%{SPACE}PAM%{GREEDYDATA:gd_1}failures;%{GREEDYDATA:gd_2}ruser=%{SPACE}rhost=%{HOSTNAME:source.host.name}%{SPACE}user=%{USERNAME:user.name}$
+SSHAUTHPWD ^%{GREEDYDATA:gd_1} password for %{USERNAME:user.name} from %{IP:source.ip} port %{POSINT:source.port}%{GREEDYDATA:gd_2}$
+#SSHAUTHPWD2 ^%{SPACE}Failed%{GREEDYDATA:gd_1}%{SPACE}user%{SPACE}%{USERNAME:user.name}%{SPACE}from%{SPACE}%{IP:source.ip}%{SPACE}port%{SPACE}%{POSINT:source.port}%{GREEDYDATA:gd_2}$
+SSHAUTHPWD2 ^%{SPACE}Failed%{GREEDYDATA:gd_1}%{SPACE}user%{SPACE}%{NOTSPACE:user.name}%{SPACE}from%{SPACE}%{IP:source.ip}%{SPACE}port%{SPACE}%{POSINT:source.port}%{GREEDYDATA:gd_2}$
+SSHAUTHPWD3 ^%{SPACE}password check failed for user %{SPACE}\(%{USERNAME:user.name}\)$
+SSHAUTHPWD4 ^%{SPACE}pam_succeed_if%{GREEDYDATA:gd_1}%{SPACE}user%{SPACE}"%{USERNAME:user.name}"$
+SSHAUTHREV  ^%{SPACE}reverse%{SPACE}mapping%{GREEDYDATA:gd_1}for%{SPACE}%{GREEDYDATA:source.host.name}\.%{WORD:domain}\.%{WORD:tld}%{SPACE}\[%{IP:source.ip}\]%{GREEDYDATA:gd_2}$
+SSHAUTHREV2 ^%{GREEDYDATA:gd_1}string%{SPACE}from%{SPACE}%{IP:source.ip}%{SPACE}port%{SPACE}%{POSINT:source.port}
+SSHAUTHPKY ^%{GREEDYDATA:gd_1} publickey for %{USERNAME:user.name} from %{IP:source.ip} port %{POSINT:source.port}%{GREEDYDATA:gd_2}$
+SSHSESOPEN ^%{GREEDYDATA:gd_1}sshd:session%{GREEDYDATA:gd_2}opened for user %{USERNAME:user.name}%{GREEDYDATA:gd_3}$
+SSHSESCLOSE ^%{GREEDYDATA:gd_1}sshd:session%{GREEDYDATA:gd_2}closed%{GREEDYDATA:gd_3}user %{USERNAME:user.name}$
+SSHSESCLOSEIP ^%{SPACE}Disconnected from user %{USERNAME:user.name}%{SPACE}%{IP:source.ip} port %{POSINT:source.port}%{SPACE}$
+SSHSESCLOSEIP2 ^%{GREEDYDATA:gd_1}Received disconnect%{GREEDYDATA:gd_2}%{IP:source.ip}%{SPACE}port %{POSINT:source.port}%{GREEDYDATA:gd_3}$
+SSHSESCLOSEIP3 ^%{GREEDYDATA:gd_1}closed%{SPACE}by%{SPACE}%{IP:source.ip}%{SPACE}port%{SPACE}%{POSINT:source.port}%{GREEDYDATA:gd_2}$
+SSHSESCLOSEIP4 ^%{GREEDYDATA:gd_1}closed%{SPACE}by%{SPACE}authenticating%{SPACE}user%{SPACE}%{USERNAME:user.name}%{SPACE}%{IP:source.ip}%{SPACE}port%{SPACE}%{POSINT:source.port}%{GREEDYDATA:gd_2}$
+SSHSESCLOSEIP5 ^%{SPACE}Connection%{SPACE}closed%{GREEDYDATA:gd_1}user%{SPACE}%{USERNAME:user.name}%{SPACE}%{IP:source.ip}%{SPACE}port%{SPACE}%{POSINT:source.port}%{GREEDYDATA:gd_2}$
+SSHSESCLOSEIP6 ^%{SPACE}Disconnected%{SPACE}from%{SPACE}%{IP:source.ip}%{SPACE}port%{SPACE}%{POSINT:source.port}%{GREEDYDATA:gd_1}$
+SSHIOAERROR ^%{SPACE}ssh_dispatch_run_fatal:%{GREEDYDATA:gd_1}%{IP:source.ip}%{SPACE}port%{SPACE}%{POSINT:source.port}%{GREEDYDATA:gd_2}$
+SSHIOAERROR2 ^%{GREEDYDATA:gd_1}differ%{SPACE}for%{SPACE}%{IP:source.ip}%{SPACE}port%{SPACE}%{POSINT:source.port}%{GREEDYDATA:gd_2}$
+SSHIOAERROR3 ^%{SPACE}error:%{GREEDYDATA:gd_1}%{SPACE}user%{SPACE}%{USERNAME:user.name}%{SPACE}from%{SPACE}%{IP:source.ip}%{SPACE}port%{SPACE}%{POSINT:source.port}%{GREEDYDATA:gd_2}$
+SSHIOAERROR4 ^%{SPACE}error:%{SPACE}maximum%{GREEDYDATA:gd_1}%{SPACE}for%{SPACE}%{USERNAME:user.name}%{SPACE}from%{SPACE}%{IP:source.ip}%{SPACE}port%{SPACE}%{POSINT:source.port}%{SPACE}%{GREEDYDATA:gd_2}
+SSHIGNORE ^%{SPACE}pam_unix\(sshd:auth\): check pass; user unknown$
+SSHIGNORE2 ^%{SPACE}invalid public DH value:%{GREEDYDATA}$
+SSHIGNORE3 ^%{SPACE}Disconnecting: Too many auth%{GREEDYDATA}$
+SSHIGNORE4 ^%{SPACE}PAM%{SPACE}service\(sshd\)%{SPACE}ignoring%{SPACE}max%{GREEDYDATA}$
+SSHHNLV1 ^%{SPACE}reverse%{SPACE}mapping%{SPACE}%{GREEDYDATA:gd_1}%{SPACE}failed%{SPACE}%{GREEDYDATA:gd_2}$
+SSHHNLV2 ^%{SPACE}packet_write_wait%{GREEDYDATA:gd_1}$
+SSHHNLV3 ^%{SPACE}Unable%{SPACE}to%{SPACE}negotiate%{GREEDYDATA:gd_1}$
+SSHHNLV4 ^%{SPACE}Bad%{SPACE}protocol%{SPACE}version%{SPACE}identification%{GREEDYDATA:gd_1}$
+SSHHNLV5 ^%{SPACE}Address%{SPACE}%{IP}%{SPACE}maps%{SPACE}to%{GREEDYDATA:gd_1}$
+#Account Changes  Ubuntu Linux Auth logs
+GROUPADD ^%{GREEDYDATA:gd_1}%{SPACE}/etc/group:%{SPACE}name=%{USERNAME:group.name},%{GREEDYDATA:gd_2}$
+GROUPADD2 ^%{GREEDYDATA:gd_1}%{SPACE}/etc/gshadow:%{SPACE}name=%{USERNAME:group.name}$
+NEWGROUP ^%{SPACE}new%{SPACE}group:%{SPACE}name=%{USERNAME:user.name}%{GREEDYDATA:gd_1}$
+NEWUSER ^%{SPACE}new%{SPACE}user:%{SPACE}name=%{USERNAME:user.name}%{GREEDYDATA:gd_1}home=%{UNIXPATH:file.path}%{GREEDYDATA:gd_2}$
+MODUSER ^%{SPACE}add '%{USERNAME:user.name}'%{GREEDYDATA:gd_1}group%{SPACE} '%{USERNAME:group.name}'$
+MODUSER2 ^%{SPACE}change%{SPACE}user%{SPACE}'%{USERNAME:user.name}'%{GREEDYDATA:gd_1}$
+PWDCHANGE ^%{GREEDYDATA:gd_1}password%{SPACE}changed%{SPACE}for%{SPACE}%{USERNAME:user.name}$
+
+#SUDO events Ubuntu Linux auth logs
+SUDOSESCLOSE ^%{GREEDYDATA:gd_1}sudo:session%{GREEDYDATA:gd_2}closed for user %{USERNAME:sudo_user}%{SPACE}$
+#SUDOSESOPEN  %{GREEDYDATA:gd_1}session%{SPACE}opened%{SPACE}for%{SPACE}user%{SPACE}%{USERNAME:sudo_user}%{SPACE}by%{SPACE}%{USERNAME:user.name}\(%{GREEDYDATA:gd_2}
+SUDOSESOPEN ^%{GREEDYDATA:gd_1}sudo:session%{GREEDYDATA:gd_2}opened for user %{USERNAME:sudo_user} by %{USERNAME:user.name}\(u%{GREEDYDATA:gd_3}$
+SUDOSESOPEN2 ^%{GREEDYDATA:gd_1}sudo:session%{GREEDYDATA:gd_2}opened for user %{USERNAME:sudo_user}%{SPACE}by%{SPACE}\(u%{GREEDYDATA:gd_3}$
+SUDOCMD ^%{SPACE}%{USERNAME:user.name}%{SPACE}:%{GREEDYDATA:gd_1}PWD=%{PATH:file.path}%{SPACE};%{SPACE}USER=%{USERNAME:sudo_user}%{SPACE};%{SPACE}COMMAND=%{GREEDYDATA:sudo_cmd}$
+SUDOAUTHF ^%{GREEDYDATA:gd_1}authentication failure;%{SPACE}logname=%{USERNAME:user.name}%{GREEDYDATA:gd_2}ruser=%{USERNAME:user.name1}%{GREEDYDATA:gd_3}%{SPACE}user=%{USERNAME:user.name2}$
+SUDOAUTHERR ^%{GREEDYDATA:gd_1}sudo:auth%{GREEDYDATA:gd_2}open%{SPACE}/%{GREEDYDATA:gd_3}$
+SUDOAUTHF2 ^%{GREEDYDATA:gd_1}authentication failure;%{SPACE}logname=%{SPACE}uid%{GREEDYDATA:gd_2}ruser=%{USERNAME:user.name}%{GREEDYDATA:gd_3}user=%{USERNAME:user.name1}$
+SUDOAUTHF3 ^%{GREEDYDATA:gd_1}identify%{SPACE}password%{SPACE}for%{SPACE}\[%{USERNAME:user.name}\]$
+
+#
+
+SUUSER ^%{SPACE}\(to%{SPACE}%{USERNAME:user.name}\)%{SPACE}%{USERNAME:user.name1}%{SPACE}%{GREEDYDATA:gd_1}$
+SUAUTH ^%{SPACE}pam_unix\(sudo:session%{GREEDYDATA:gd_1}user%{SPACE}%{USERNAME:user.name}\(%{NOTSPACE:ns_1}%{SPACE}by%{SPACE}%{USERNAME:user.name1}%{GREEDYDATA:gd_2}$
+#SUSESSIONOPEN ^%{GREEDYDATA:gd_1}su-l:session%{GREEDYDATA:gd_2}by%{SPACE}%{USERNAME:user.name}%{GREEDYDATA:gd_3}$
+SUSESSIONOPEN  ^%{SPACE}pam_unix\(su-l:session%{GREEDYDATA:gd_1}user%{SPACE}%{USERNAME:user.name}%{SPACE}by%{SPACE}%{USERNAME:user.name1}\(%{GREEDYDATA:gd_2}$
+SUSESSIONOPEN1 ^%{SPACE}pam_unix\(su-l%{GREEDYDATA:gd_1}%{SPACE}user%{SPACE}%{USERNAME:user.name}\(%{GREEDYDATA:gd_2}by%{SPACE}%{USERNAME:user.name1}\(%{GREEDYDATA:gd_3}$
+#SUSESSIONCLOSE %{GREEDYDATA:gd_1}closed%{SPACE}for%{SPACE}%{GREEDYDATA:gd_2}
+SUSESSIONCLOSE ^%{GREEDYDATA:gd_1}su-l:session%{GREEDYDATA:gd_2}closed%{SPACE}for%{SPACE}user%{SPACE}%{USERNAME:user.name}$
+# Login and systemd-login events Ubuntu Linux Auth logs
+LOGINSESOPEN ^%{GREEDYDATA:gd_1}user%{SPACE}%{USERNAME:user.name}%{SPACE}by%{GREEDYDATA:gd_2}$
+LOGINDSESNEW ^%{SPACE}New%{GREEDYDATA:gd_1}user%{SPACE}%{USERNAME:user.name}.$
+
+# Systemd captures username in console logins,  infrequent but would identifiy privileged user accounts, therefore should be deidentified
+SYSTEMDLOGIN ^%{GREEDYDATA:gd_1}for%{SPACE}user%{SPACE}%{USERNAME:user.name}%{GREEDYDATA:gd_2}$
+
+#

@@ -1,0 +1,13 @@
+---
+# Sample values for review only, 
+# Please change to something different.
+# The site random seed should be between 4000 and 9999,
+# OF3 should be on of the first 50 prime numbers, ignoring 2-7
+# OF2 should be one of the next 50 primes, 233 - 541
+# SD can be any number bewteen 3 and 13
+of3: 11
+of2: 123
+sd: 10
+rrev: true
+flip: false
+siterandseed: 9999

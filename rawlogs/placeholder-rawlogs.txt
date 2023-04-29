@@ -1,0 +1,1 @@
+A temp file just to create the default deidentification pipeline read locations. An install script would be ideal but not as high on the to-do pile

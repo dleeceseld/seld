@@ -1,0 +1,4 @@
+other.dom
+another.ca
+example.local
+example.com

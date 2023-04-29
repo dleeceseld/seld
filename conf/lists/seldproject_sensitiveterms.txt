@@ -1,0 +1,13 @@
+mydomain
+mydomain.local
+myotherdomain
+myotherdomain.com
+172\.16\.16
+10\.10\.10
+192\.168\.168
+asmith
+bjones
+bjones-admin
+svc-topsecret
+svc-
+ENDOFFILEMARKER

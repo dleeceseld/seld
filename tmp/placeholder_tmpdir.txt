@@ -1,0 +1,1 @@
+A temp file to make sure the default directory is in place for for the logstash pipelines tracking files and execution logs.  

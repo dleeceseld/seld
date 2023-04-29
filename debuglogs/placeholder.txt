@@ -1,0 +1,1 @@
+For anything that a module doesn't have a pattern for, or just general debugging, this directory is currently hardcoded so this place holder text ensures it gets created. One less error to chase down.
